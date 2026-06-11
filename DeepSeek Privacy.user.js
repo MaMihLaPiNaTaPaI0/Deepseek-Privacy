@@ -1,35 +1,37 @@
 // ==UserScript==
-// @name         Deepseek Privacy
+// @name         Deepseek 隐私保护
 // @namespace    https://github.com/landifrancesco/Deepseek-Privacy
-// @version      1
-// @description  Hide and replace sensitive data on the chat interface with a user-friendly UI.
+// @version      1.1
+// @description  在聊天界面隐藏并替换敏感数据，提供友好的用户界面。
 // @author       Francesco Landi
 // @match        https://chat.deepseek.com/a/chat/s/*
 // @grant        GM_addStyle
 // @license      GNU General Public License v3.0
+// @downloadURL https://raw.githubusercontent.com/MaMihLaPiNaTaPaI0/Deepseek-Privacy/edit/Zh/DeepSeek%20Privacy.user.js
+// @updateURL https://raw.githubusercontent.com/MaMihLaPiNaTaPaI0/Deepseek-Privacy/edit/Zh/DeepSeek%20Privacy.user.js
 // ==/UserScript==
 
 (function () {
     'use strict';
 
-    // Load saved sensitive data from localStorage
+    // 从 localStorage 加载已保存的敏感数据
     let sensitiveData = JSON.parse(localStorage.getItem('sensitiveData')) || {};
     let caseSensitive = JSON.parse(localStorage.getItem('caseSensitive')) || false;
 
-    // Function to replace sensitive data
+    // 替换敏感数据的函数
     function replaceSensitiveData() {
         const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
         let node;
 
         while (node = walker.nextNode()) {
-            // Skip if the node is within the popup
+            // 跳过弹窗内的节点
             if (node.parentElement.closest('#sensitiveDataPopup')) continue;
 
             let text = node.nodeValue;
 
-            // Replace each sensitive word
+            // 替换每个敏感词
             for (const [word, replacement] of Object.entries(sensitiveData)) {
-                const regex = new RegExp(word, caseSensitive ? "g" : "gi"); // Use "g" or "gi" based on caseSensitive
+                const regex = new RegExp(word, caseSensitive ? "g" : "gi");
                 text = text.replace(regex, replacement);
             }
 
@@ -37,7 +39,7 @@
         }
     }
 
-    // Function to detect the page theme
+    // 检测页面主题的函数
     function detectTheme() {
         const bgColor = window.getComputedStyle(document.body).backgroundColor;
         const rgb = bgColor.match(/\d+/g);
@@ -45,15 +47,15 @@
             const brightness = (rgb[0] * 299 + rgb[1] * 587 + rgb[2] * 114) / 1000;
             return brightness > 128 ? 'light' : 'dark';
         }
-        return 'light'; // Default to light theme if detection fails
+        return 'light'; // 如果检测失败，默认为浅色主题
     }
 
-    // Function to create the lock icon and popup UI
+    // 创建锁图标和弹窗UI的函数
     function createUI() {
         const theme = detectTheme();
         const isDarkTheme = theme === 'dark';
 
-        // Add styles for the lock icon and popup
+        // 添加锁图标和弹窗的样式
         GM_addStyle(`
             #sensitiveDataLock {
                 position: fixed;
@@ -108,43 +110,43 @@
             }
         `);
 
-        // Create the lock icon
+        // 创建锁图标
         const lockIcon = document.createElement('div');
         lockIcon.id = 'sensitiveDataLock';
         lockIcon.innerHTML = '🔒';
         document.body.appendChild(lockIcon);
 
-        // Create the popup
+        // 创建弹窗
         const popup = document.createElement('div');
         popup.id = 'sensitiveDataPopup';
         popup.innerHTML = `
-            <h3>Sensitive Data Hider</h3>
-            <input id="sensitiveWordInput" placeholder="Sensitive Word">
-            <input id="replacementInput" placeholder="Replacement">
+            <h3>敏感数据隐藏器</h3>
+            <input id="sensitiveWordInput" placeholder="输入敏感词">
+            <input id="replacementInput" placeholder="输入替换词">
             <div class="case-sensitive-container">
                 <input type="checkbox" id="caseSensitiveCheckbox">
-                <label for="caseSensitiveCheckbox">Case Sensitive</label>
+                <label for="caseSensitiveCheckbox">区分大小写</label>
             </div>
-            <button id="addSensitiveData">Add</button>
+            <button id="addSensitiveData">添加</button>
             <div id="sensitiveDataList"></div>
-            <button id="closePopup">Close</button>
+            <button id="closePopup">关闭</button>
         `;
         document.body.appendChild(popup);
 
-        // Toggle popup visibility
+        // 切换弹窗显示/隐藏
         lockIcon.addEventListener('click', () => {
             popup.style.display = popup.style.display === 'block' ? 'none' : 'block';
             updateSensitiveDataList();
-            // Update the checkbox state when the popup is opened
+            // 打开弹窗时更新复选框状态
             document.getElementById('caseSensitiveCheckbox').checked = caseSensitive;
         });
 
-        // Close popup
+        // 关闭弹窗
         document.getElementById('closePopup').addEventListener('click', () => {
             popup.style.display = 'none';
         });
 
-        // Add new sensitive word and replacement
+        // 添加新的敏感词和替换词
         document.getElementById('addSensitiveData').addEventListener('click', () => {
             const word = document.getElementById('sensitiveWordInput').value.trim();
             const replacement = document.getElementById('replacementInput').value.trim();
@@ -159,19 +161,19 @@
             }
         });
 
-        // Update the list of sensitive words and replacements
+        // 更新敏感词和替换词的列表
         function updateSensitiveDataList() {
             const list = document.getElementById('sensitiveDataList');
             list.innerHTML = Object.entries(sensitiveData)
                 .map(([word, replacement]) => `
                     <div>
                         <strong>${word}</strong> → ${replacement}
-                        <button data-word="${word}" class="removeButton">Remove</button>
+                        <button data-word="${word}" class="removeButton">删除</button>
                     </div>
                 `)
                 .join('');
 
-            // Add event listeners to the remove buttons
+            // 为删除按钮添加事件监听器
             document.querySelectorAll('.removeButton').forEach(button => {
                 button.addEventListener('click', () => {
                     const word = button.getAttribute('data-word');
@@ -180,7 +182,7 @@
             });
         }
 
-        // Remove a sensitive word and replacement
+        // 删除一个敏感词和替换词
         function removeSensitiveData(word) {
             delete sensitiveData[word];
             localStorage.setItem('sensitiveData', JSON.stringify(sensitiveData));
@@ -188,22 +190,22 @@
             replaceSensitiveData();
         }
 
-        // Toggle case sensitivity
+        // 切换大小写敏感性
         document.getElementById('caseSensitiveCheckbox').addEventListener('change', (event) => {
             caseSensitive = event.target.checked;
             localStorage.setItem('caseSensitive', JSON.stringify(caseSensitive));
-            replaceSensitiveData(); // Reapply replacements with the new case sensitivity setting
+            replaceSensitiveData(); // 使用新的大小写敏感性设置重新应用替换
         });
 
-        // Initialize the checkbox state
+        // 初始化复选框状态
         document.getElementById('caseSensitiveCheckbox').checked = caseSensitive;
     }
 
-    // Initialize the UI and replace sensitive data
+    // 初始化UI并替换敏感数据
     createUI();
     replaceSensitiveData();
 
-    // Observe DOM changes for dynamic content
+    // 观察DOM变化以处理动态内容
     const observer = new MutationObserver(replaceSensitiveData);
     observer.observe(document.body, { childList: true, subtree: true });
 })();
