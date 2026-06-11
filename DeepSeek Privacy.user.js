@@ -7,8 +7,8 @@
 // @match        https://chat.deepseek.com/a/chat/s/*
 // @grant        GM_addStyle
 // @license      GNU General Public License v3.0
-// @downloadURL https://raw.githubusercontent.com/MaMihLaPiNaTaPaI0/Deepseek-Privacy/edit/Zh/DeepSeek%20Privacy.user.js
-// @updateURL https://raw.githubusercontent.com/MaMihLaPiNaTaPaI0/Deepseek-Privacy/edit/Zh/DeepSeek%20Privacy.user.js
+// @downloadURL https://raw.githubusercontent.com/MaMihLaPiNaTaPaI0/Deepseek-Privacy/Zh/DeepSeek%20Privacy.user.js
+// @updateURL https://raw.githubusercontent.com/MaMihLaPiNaTaPaI0/Deepseek-Privacy/Zh/DeepSeek%20Privacy.user.js
 // ==/UserScript==
 
 (function () {
